@@ -11,13 +11,21 @@ const io = new Server(server, {
     origin: "*", 
   },
 });
+let players = [];
+const gameStats = [null,null,null,null,null,null,null,null,null]
 
 io.on("connection", (socket) => {
-  console.log("A user connected:", socket.id);
-    socket.on("join-room", (roomNumber)=> {
-        socket.join(roomNumber)
-    })
+    console.log("player connected", socket.id);
     
+    players.push(socket.id)
+    if (players.length ==2) {
+        io.emit("receive-stats", gameStats)
+        io.to(players[0]).emit("tic-type" , "X")
+        io.to(players[1]).emit("tic-type", "O")
+    }
+    socket.on("disconnect", () => {
+    players = players.filter(p => p !== socket.id);
+  });
 });
 
 server.listen(3000, () => {
